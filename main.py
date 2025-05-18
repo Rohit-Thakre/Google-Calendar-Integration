@@ -1,6 +1,6 @@
-
 import logging
 import uuid
+import uvicorn
 from fastapi.responses import RedirectResponse
 from google_auth_oauthlib.flow import Flow
 from fastapi import APIRouter, Request, Response
@@ -10,7 +10,9 @@ from fastapi import FastAPI
 import os
 from dotenv import load_dotenv
 
+# Load environment variables from .env file
 load_dotenv()
+
 app = FastAPI()
 
 logger = logging.getLogger()
@@ -18,9 +20,11 @@ logger = logging.getLogger()
 
 GOOGLE_CLIENT_CONFIG = {
     "web": {
-        "client_id": os.getenv("GOOGLE_CLIENT_ID"),
-        "client_secret": os.getenv("GOOGLE_CLIENT_SECRET"),
-        "redirect_uris": [os.getenv("GOOGLE_REDIRECT_URI")],
+        "client_id": os.getenv("CLIENT_ID"),
+        "client_secret": os.getenv("CLIENT_SECRET"),
+        "redirect_uris": [
+            os.getenv("BASE_URI"),
+        ],
         "auth_uri": "https://accounts.google.com/o/oauth2/auth",
         "token_uri": "https://oauth2.googleapis.com/token",
     }
@@ -45,10 +49,11 @@ async def root():
 
 @app.get("/google-calendar/auth")
 async def auth_google():
+    print(os.getenv("BASE_URI"))
     flow = Flow.from_client_config(
         GOOGLE_CLIENT_CONFIG,
         scopes=["https://www.googleapis.com/auth/calendar"],
-        redirect_uri=os.getenv("GOOGLE_REDIRECT_URI"),
+        redirect_uri=os.getenv("BASE_URI"),
     )
     auth_url, _ = flow.authorization_url(
         prompt="consent", access_type="offline", include_granted_scopes="true"
@@ -63,7 +68,7 @@ async def callback(request: Request):
     flow = Flow.from_client_config(
         GOOGLE_CLIENT_CONFIG,
         scopes=["https://www.googleapis.com/auth/calendar"],
-        redirect_uri=os.getenv("GOOGLE_REDIRECT_URI"),
+        redirect_uri=os.getenv("BASE_URI"),
     )
     flow.fetch_token(code=code)
     credentials = flow.credentials
@@ -78,8 +83,8 @@ async def callback(request: Request):
         token=credentials.token,
         refresh_token=credentials.refresh_token,
         token_uri="https://oauth2.googleapis.com/token",
-        client_id=os.getenv("GOOGLE_CLIENT_ID"),
-        client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
+        client_id=os.getenv("CLIENT_ID"),
+        client_secret=os.getenv("CLIENT_SECRET"),
         expiry=credentials.expiry,
     )
     service = build("calendar", "v3", credentials=creds)
@@ -91,7 +96,7 @@ async def callback(request: Request):
             body={
                 "id": str(uuid.uuid4()),  # your own unique channel ID
                 "type": "web_hook",
-                "address": os.getenv("GOOGLE_WEBHOOK_URI"),  # url should be https
+                "address": os.getenv("WEBHOOK_URI"),  # url should be https
                 "token": "rohitthakre369@gmail.com",  # optional, shows up in X-Goog-Channel-Token
             },
         )
@@ -112,7 +117,7 @@ async def callback(request: Request):
     logger.info(f"channel: {channel}")
 
     # Redirect to the home page after successful authentication
-    return RedirectResponse(url=os.getenv("GOOGLE_REDIRECT_URI"))
+    return RedirectResponse(url=os.getenv("BASE_URI"))
 
 
 @app.post("/google-calendar/webhook")
@@ -137,8 +142,8 @@ async def google_calendar_webhook(request: Request):
         token=user["access_token"],
         refresh_token=user["refresh_token"],
         token_uri="https://oauth2.googleapis.com/token",
-        client_id=os.getenv("GOOGLE_CLIENT_ID"),
-        client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
+        client_id=os.getenv("CLIENT_ID"),
+        client_secret=os.getenv("CLIENT_SECRET"),
         expiry=user["token_expiry"],
     )
     service = build("calendar", "v3", credentials=creds)
@@ -160,3 +165,4 @@ async def google_calendar_webhook(request: Request):
     # enrich_event_if_needed(service, event)
 
     return Response(status_code=200)
+
