@@ -8,8 +8,9 @@ from googleapiclient.discovery import build
 from google.oauth2.credentials import Credentials
 from fastapi import FastAPI
 import os
+from dotenv import load_dotenv
 
-
+load_dotenv()
 app = FastAPI()
 
 logger = logging.getLogger()
