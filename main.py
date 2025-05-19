@@ -34,7 +34,7 @@ USER_CREDENTIALS = {
     # example user
     "rohitthakre369@gmail.com": {
         "access_token": None,
-        "refresh_token": None,  
+        "refresh_token": None,
         "token_expiry": None,
         "channel_id": None,
         "resource_id": None,
@@ -87,34 +87,34 @@ async def callback(request: Request):
         client_secret=os.getenv("CLIENT_SECRET"),
         expiry=credentials.expiry,
     )
-    # service = build("calendar", "v3", credentials=creds)
+    service = build("calendar", "v3", credentials=creds)
 
-    # channel = (
-    #     service.events()
-    #     .watch(
-    #         calendarId="primary",
-    #         body={
-    #             "id": str(uuid.uuid4()),  # your own unique channel ID
-    #             "type": "web_hook",
-    #             "address": os.getenv("GOOGLE_WEBHOOK_URI"),  # url should be https
-    #             "token": "rohitthakre369@gmail.com",  # optional, shows up in X-Goog-Channel-Token
-    #         },
-    #     )
-    #     .execute()
-    # )
+    channel = (
+        service.events()
+        .watch(
+            calendarId="primary",
+            body={
+                "id": str(uuid.uuid4()),  # your own unique channel ID
+                "type": "web_hook",
+                "address": os.getenv("GOOGLE_WEBHOOK_URI"),  # url should be https
+                "token": "rohitthakre369@gmail.com",  # optional, shows up in X-Goog-Channel-Token
+            },
+        )
+        .execute()
+    )
 
-    # # uncomment this when we want to stop the channel
-    # # service.channels().stop(
-    # #     body={
-    # #         "id": channel["id"],
-    # #         "resourceId": channel["resourceId"],
-    # #     }
-    # # ).execute()
+    # uncomment this when we want to stop the channel
+    # service.channels().stop(
+    #     body={
+    #         "id": channel["id"],
+    #         "resourceId": channel["resourceId"],
+    #     }
+    # ).execute()
 
-    # # Save: channel["id"], channel["resourceId"]
-    # USER_CREDENTIALS["rohitthakre369@gmail.com"]["channel_id"] = channel["id"]
-    # USER_CREDENTIALS["rohitthakre369@gmail.com"]["resource_id"] = channel["resourceId"]
-    # logger.info(f"channel: {channel}")
+    # Save: channel["id"], channel["resourceId"]
+    USER_CREDENTIALS["rohitthakre369@gmail.com"]["channel_id"] = channel["id"]
+    USER_CREDENTIALS["rohitthakre369@gmail.com"]["resource_id"] = channel["resourceId"]
+    logger.info(f"channel: {channel}")
 
     # Redirect to the home page after successful authentication
     return RedirectResponse(url=os.getenv("HOME_URI"))
@@ -161,11 +161,12 @@ async def google_calendar_webhook(request: Request):
     )
     logger.info(f"events_result: {events_result}")
 
-    # for event in events_result.get("items", []):
-    # enrich_event_if_needed(service, event)
+    for event in events_result.get("items", []):
+        logger.info(f"event:==== {event}")
+        # enrich_event_if_needed(service, event)
 
     return Response(status_code=200)
 
 
-if __name__ == "__main__":
-    uvicorn.run(app, host="localhost", port=8000)
+# if __name__ == "__main__":
+#     uvicorn.run(app, host="localhost", port=8000)
