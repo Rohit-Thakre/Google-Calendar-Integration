@@ -49,7 +49,6 @@ async def root():
 
 @app.get("/google-calendar/auth")
 async def auth_google():
-    print(os.getenv("REDIRECT_URI"))
     flow = Flow.from_client_config(
         GOOGLE_CLIENT_CONFIG,
         scopes=["https://www.googleapis.com/auth/calendar"],
