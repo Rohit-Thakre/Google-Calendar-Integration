@@ -96,7 +96,7 @@ async def callback(request: Request):
             body={
                 "id": str(uuid.uuid4()),  # your own unique channel ID
                 "type": "web_hook",
-                "address": os.getenv("GOOGLE_WEBHOOK_URI"),  # url should be https
+                "address": os.getenv("WEBHOOK_URI"),  # url should be https
                 "token": "rohitthakre369@gmail.com",  # optional, shows up in X-Goog-Channel-Token
             },
         )
