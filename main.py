@@ -32,7 +32,7 @@ GOOGLE_CLIENT_CONFIG = {
 
 USER_CREDENTIALS = {
     # example user
-    "rohitthakre369@gmail.com": {
+    "rohit.thakre@jeeva.ai": {
         "access_token": None,
         "refresh_token": None,
         "token_expiry": None,
@@ -49,6 +49,7 @@ async def root():
 
 @app.get("/google-calendar/auth")
 async def auth_google():
+    print(os.getenv("REDIRECT_URI"))
     flow = Flow.from_client_config(
         GOOGLE_CLIENT_CONFIG,
         scopes=["https://www.googleapis.com/auth/calendar"],
@@ -72,7 +73,7 @@ async def callback(request: Request):
     flow.fetch_token(code=code)
     credentials = flow.credentials
 
-    USER_CREDENTIALS["rohitthakre369@gmail.com"] = {
+    USER_CREDENTIALS["rohit.thakre@jeeva.ai"] = {
         "access_token": credentials.token,
         "refresh_token": credentials.refresh_token,
         "token_expiry": credentials.expiry,
@@ -96,7 +97,7 @@ async def callback(request: Request):
     #             "id": str(uuid.uuid4()),  # your own unique channel ID
     #             "type": "web_hook",
     #             "address": os.getenv("WEBHOOK_URI"),  # url should be https
-    #             "token": "rohitthakre369@gmail.com",  # optional, shows up in X-Goog-Channel-Token
+    #             "token": "rohit.thakre@jeeva.ai",  # optional, shows up in X-Goog-Channel-Token
     #         },
     #     )
     #     .execute()
@@ -111,8 +112,8 @@ async def callback(request: Request):
     # # ).execute()
 
     # # Save: channel["id"], channel["resourceId"]
-    # USER_CREDENTIALS["rohitthakre369@gmail.com"]["channel_id"] = channel["id"]
-    # USER_CREDENTIALS["rohitthakre369@gmail.com"]["resource_id"] = channel["resourceId"]
+    # USER_CREDENTIALS["rohit.thakre@jeeva.ai"]["channel_id"] = channel["id"]
+    # USER_CREDENTIALS["rohit.thakre@jeeva.ai"]["resource_id"] = channel["resourceId"]
     # logger.info(f"channel: {channel}")
 
     # Redirect to the home page after successful authentication
@@ -132,7 +133,7 @@ async def google_calendar_webhook(request: Request):
 
     # Step 1: Lookup user by channel_id or token
     # user = get_user_by_channel_id(channel_id)
-    user = USER_CREDENTIALS["rohitthakre369@gmail.com"]
+    user = USER_CREDENTIALS["rohit.thakre@jeeva.ai"]
     if not user:
         return Response(status_code=404)
 
